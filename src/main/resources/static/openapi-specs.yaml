@@ -1,0 +1,213 @@
+openapi: 3.0.1
+info:
+  title: Restaurant API
+  description: API documentation for the Restaurant application
+  version: '1.0'
+servers:
+  - url: http://localhost:8080
+    description: Generated server url
+paths:
+  /restaurant:
+    post:
+      tags:
+        - restaurant-api
+      summary: Create a new restaurant
+      description: Creates a new restaurant record with the provided details.
+      operationId: createRestaurant
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestaurantDto'
+        required: true
+      responses:
+        '201':
+          description: Restaurant created successfully
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Invalid input provided
+        '401':
+          description: Unauthorized
+  /restaurant/{restaurantId}/review:
+    post:
+      tags:
+        - restaurant-review-api
+      summary: Create a new review for a restaurant
+      description: Submit a new review for the specified restaurant using its ID. The review will be associated with the restaurant.
+      operationId: createRestaurantReview
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestaurantReviewDto'
+        required: true
+      responses:
+        '201':
+          description: Successfully created the restaurant review
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Invalid input, review data or restaurant ID is missing or malformed
+        '404':
+          description: Restaurant not found with the provided ID
+  /restaurant/{restaurantId}:
+    get:
+      tags:
+        - restaurant-api
+      summary: Retrieve a created restaurant
+      description: Retrieve a restaurant record using restaurant ID.
+      operationId: getRestaurant
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestaurantDto'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Restaurant does not exist
+  /restaurant/{restaurantId}/reviews:
+    get:
+      tags:
+        - restaurant-review-api
+      summary: Get all reviews for a specific restaurant
+      description: Retrieve a paginated list of all reviews associated with a specific restaurant.
+      operationId: getAllReviewsForRestaurant
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+      responses:
+        '200':
+          description: Successfully retrieved reviews
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestaurantReviewDto'
+        '400':
+          description: Invalid pagination parameters (page or size)
+        '404':
+          description: Restaurant not found with the provided ID
+  /restaurant/{restaurantId}/review/average:
+    get:
+      tags:
+        - restaurant-review-api
+      summary: Get the average review for a specific restaurant
+      description: Retrieve the average review rating for a specific restaurant based on all the reviews submitted for it.
+      operationId: getAverageRestaurantReview
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successfully retrieved the average review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AverageReview'
+        '404':
+          description: Restaurant not found with the provided ID
+components:
+  schemas:
+    RestaurantDto:
+      required:
+        - address
+        - cuisineType
+        - priceRange
+        - restaurantName
+      type: object
+      properties:
+        restaurantId:
+          type: integer
+          format: int64
+        restaurantName:
+          maxLength: 50
+          minLength: 2
+          type: string
+        cuisineType:
+          type: string
+        address:
+          maxLength: 200
+          minLength: 0
+          type: string
+        priceRange:
+          type: string
+          enum:
+            - LOW
+            - MEDIUM
+            - HIGH
+    RestaurantReviewDto:
+      required:
+        - comment
+        - rating
+        - visitDate
+      type: object
+      properties:
+        rating:
+          maximum: 5
+          minimum: 1
+          type: integer
+          format: int32
+        comment:
+          maxLength: 100
+          minLength: 5
+          type: string
+        visitDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum:
+            - PENDING
+            - APPROVED
+    AverageReview:
+      type: object
+      properties:
+        restaurantId:
+          type: integer
+          format: int64
+        averageReview:
+          type: number
+          format: double
