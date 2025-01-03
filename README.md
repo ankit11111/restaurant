@@ -25,7 +25,7 @@ This is a Spring Boot application that allows users to manage restaurant reviews
 ### 1. Clone the Repository
 Clone this repository to your local machine:
 
-`git clone https://github.com/yourusername/restaurant.git`
+`git clone https://github.com/ankit11111/restaurant.git`
 
 `cd restaurant`
 
