@@ -1,14 +1,18 @@
 package com.review.restaurant.controller;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.review.restaurant.constants.PathConstants;
@@ -74,5 +78,20 @@ public class RestaurantApi {
 
         // Return the restaurant wrapped in a 200 OK response
         return ResponseEntity.status(HttpStatus.OK).body(restaurantDto);
+	}
+
+	@RequestMapping(method = RequestMethod.GET,
+			value = PathConstants.GET_ALL_RESTAURANTS,
+			produces = {"application/json"})
+	public ResponseEntity<List<RestaurantDto>> listRestaurants(@RequestParam(name = "minimumRating", required = false) final Double minimumRating) {
+		logger.info("Fetching restaurant for for minimumRating {}", minimumRating);
+		List<RestaurantDto> restaurantDtoList = restaurantService.listAllRestaurants(minimumRating);
+		if (CollectionUtils.isEmpty(restaurantDtoList)) {
+            // If no restaurant is found, return a 404 Not Found response
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        // Return the restaurant wrapped in a 200 OK response
+        return ResponseEntity.status(HttpStatus.OK).body(restaurantDtoList);
 	}
 }
